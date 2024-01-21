@@ -1,0 +1,26 @@
+[package]
+name = "sx3d"
+version = "0.1.0"
+edition = "2021"
+authors = ["Luis Arias <ariasb.luis@gmail.com>"]
+repository = "https://github.com/luisbedoia/sx3d.git"
+license = "MIT"
+description = "A simple 3D STL files viewer on console."
+readme = "README.md"
+keywords = ["3d", "stl", "console", "terminal", "viewer", "ascii_art"]
+categories = ["graphics", "console", "terminal", "viewer"]
+
+[[bin]]
+edition = "2021"
+name = "sx3d"
+path = "src/main.rs"
+
+[lib]
+name = "sx3d"
+path = "src/lib.rs"
+
+[dependencies]
+rayon = "1.6.1"
+stl_io = "0.7.0"
+assert_float_eq = "1.1.3"
+termion = "3.0.0"
