@@ -23,11 +23,11 @@ impl Console {
         Self {}
     }
 
-    pub fn start(&mut self, path: String) -> thread::JoinHandle<()> {
+    pub fn start(&mut self, path: String, cols: usize) -> thread::JoinHandle<()> {
         let indexed_mesh = read_mesh(path).unwrap();
         let object = Object::new(indexed_mesh.clone());
         let maximum_diameter = 2.0 * object.get_maximum_radius();
-        let matrix = Matrix::new(51, maximum_diameter);
+        let matrix = Matrix::new(cols, maximum_diameter);
 
         let mut scene = Scene::new(object, [-1.0, -1.0, -1.0], [0.0, 0.0, -1.0]);
         thread::spawn(move || {

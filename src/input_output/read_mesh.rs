@@ -22,13 +22,7 @@ fn read_file(path: String) -> Result<File, Sx3dError> {
 fn read_mesh_from_file(file: &mut File) -> Result<IndexedMesh, Sx3dError> {
     let mesh_result = read_stl(file);
     match mesh_result {
-        Ok(mesh) => match mesh.validate() {
-            Ok(_) => Ok(mesh),
-            Err(error) => Err(Sx3dError {
-                message: format!("Error Validating Mesh: {error}"),
-                error: Some(Box::new(error)),
-            }),
-        },
+        Ok(mesh) => Ok(mesh),
         Err(error) => Err(Sx3dError {
             message: format!("Error Reading Mesh: {error}"),
             error: Some(Box::new(error)),

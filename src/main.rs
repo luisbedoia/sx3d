@@ -1,9 +1,9 @@
-use sx3d::input_output::Console;
+use sx3d::input_output::{get_file_path, Console};
 
 fn main() {
-    let path = "./examples/twisted_torus.stl".to_string();
+    let (path, cols) = get_file_path();
 
     let mut keyboard_input = Console::new();
-    let handle = keyboard_input.start(path);
+    let handle = keyboard_input.start(path, cols);
     handle.join().unwrap();
 }

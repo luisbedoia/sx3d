@@ -6,10 +6,8 @@ pub fn get_shadow_char(value: f32) -> char {
     let index = (value * length).floor() as usize;
     if index >= length as usize {
         '@'
-    } else if index <= 0 {
-        return '.';
     } else {
-        return gray_scale[index];
+        gray_scale[index]
     }
 }
 
