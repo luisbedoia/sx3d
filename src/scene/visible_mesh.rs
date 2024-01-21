@@ -68,11 +68,11 @@ impl VisibleMesh {
             if is_face_visible(&normal, observer) {
                 let shadow_value = calculate_shadow_value(light, &normal);
                 let mut visible_face = VisibleFace::new(vertices, normal);
-                let mean_z = calculate_mean_z(&[
-                    original_vertices[vertices[0]].into(),
-                    original_vertices[vertices[1]].into(),
-                    original_vertices[vertices[2]].into(),
-                ]);
+                let original_vertex_1: [f32; 3] = original_vertices[vertices[0]].into();
+                let original_vertex_2: [f32; 3] = original_vertices[vertices[1]].into();
+                let original_vertex_3: [f32; 3] = original_vertices[vertices[2]].into();
+                let mean_z =
+                    calculate_mean_z(&[original_vertex_1, original_vertex_2, original_vertex_3]);
                 visible_face.set_shadow_value(shadow_value);
                 visible_face.set_mean_z(&mean_z);
                 visible_mesh.set_face(visible_face, original_vertices);
