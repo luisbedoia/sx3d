@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use std::f32::consts::PI;
 
 use sx3d::input_output::read_mesh;
-use sx3d::scene::{Object, Scene, VisibleFace, VisibleMesh};
 use sx3d::matrix::Matrix;
+use sx3d::scene::{Object, Scene, VisibleFace, VisibleMesh};
 
 #[test]
 fn it_should_create_object() {

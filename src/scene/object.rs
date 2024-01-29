@@ -83,7 +83,7 @@ impl Object {
     }
 
     fn move_mesh_to_center(mesh: IndexedMesh) -> IndexedMesh {
-        let new_vertices: Vec<Vector<f32>> = Object::center_vertices(mesh.vertices);
+        let new_vertices: Vec<Vector<f32>> = Object::move_vertices_to_center(mesh.vertices);
 
         let new_mesh: IndexedMesh = IndexedMesh {
             vertices: new_vertices,
@@ -111,7 +111,7 @@ impl Object {
         (x, y, z)
     }
 
-    fn center_vertices(vertices: Vec<Vector<f32>>) -> Vec<Vector<f32>> {
+    fn move_vertices_to_center(vertices: Vec<Vector<f32>>) -> Vec<Vector<f32>> {
         let (x, y, z) = Object::calculate_center_coordinates(&vertices);
         let mut new_vertices: Vec<Vector<f32>> = Vec::new();
 
@@ -176,9 +176,17 @@ impl Object {
         let mut y = vertex[1];
         let mut z = vertex[2];
 
-        self.rotate_tuple_over_x((&mut x, &mut y, &mut z), angle_x);
-        self.rotate_tuple_over_y((&mut x, &mut y, &mut z), angle_y);
-        self.rotate_tuple_over_z((&mut x, &mut y, &mut z), angle_z);
+        if angle_x.abs() > 0.0_f32 {
+            self.rotate_tuple_over_x((&mut x, &mut y, &mut z), angle_x);
+        }
+
+        if angle_y.abs() > 0.0_f32 {
+            self.rotate_tuple_over_y((&mut x, &mut y, &mut z), angle_y);
+        }
+
+        if angle_z.abs() > 0.0f32 {
+            self.rotate_tuple_over_z((&mut x, &mut y, &mut z), angle_z);
+        }
 
         Vertex::new([x, y, z])
     }
