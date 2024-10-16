@@ -2,8 +2,8 @@ use crate::scene::VisibleMesh;
 use crate::utils::{calculate_triangle_area, get_shadow_char, is_point_inside_triangle};
 use std::char;
 use std::f32::INFINITY;
+use std::ops::Range;
 use std::sync::{Arc, Mutex};
-use std::{ops::Range, thread};
 
 #[derive(Debug, Clone)]
 pub struct Matrix {
@@ -72,35 +72,30 @@ impl Matrix {
         self.mean_z.lock().unwrap().iter_mut().for_each(|z| {
             *z = -INFINITY;
         });
-        thread::scope(|s| {
-            for (face_index, face) in faces.iter().enumerate() {
-                s.spawn(move || {
-                    let face_bounary_box = visible_mesh.get_face_bounding_box_xy(face_index);
-                    let face_vertices = visible_mesh.get_face_vertices_xy(face_index);
-                    let face_area = calculate_triangle_area(&face_vertices);
-                    let shadow_value = face.get_shadow_value();
-                    let mean_z = face.get_mean_z();
-                    let shadow_char = get_shadow_char(*shadow_value);
 
-                    let [min_point, max_point] = face_bounary_box;
-                    let (min_col, min_row) =
-                        self.coordinates_to_indexes(min_point[0], min_point[1]);
-                    let (max_col, max_row) =
-                        self.coordinates_to_indexes(max_point[0], max_point[1]);
+        for (face_index, face) in faces.iter().enumerate() {
+            let face_bounary_box = visible_mesh.get_face_bounding_box_xy(face_index);
+            let face_vertices = visible_mesh.get_face_vertices_xy(face_index);
+            let face_area = calculate_triangle_area(&face_vertices);
+            let shadow_value = face.get_shadow_value();
+            let mean_z = face.get_mean_z();
+            let shadow_char = get_shadow_char(*shadow_value);
 
-                    self.clone().scan_boundary_box(
-                        &face_vertices,
-                        &face_area,
-                        &shadow_char,
-                        mean_z,
-                        min_col,
-                        min_row,
-                        max_col,
-                        max_row,
-                    );
-                });
-            }
-        });
+            let [min_point, max_point] = face_bounary_box;
+            let (min_col, min_row) = self.coordinates_to_indexes(min_point[0], min_point[1]);
+            let (max_col, max_row) = self.coordinates_to_indexes(max_point[0], max_point[1]);
+
+            self.clone().scan_boundary_box(
+                &face_vertices,
+                &face_area,
+                &shadow_char,
+                mean_z,
+                min_col,
+                min_row,
+                max_col,
+                max_row,
+            );
+        }
     }
 
     fn get_data(&self) -> Vec<char> {

@@ -1,32 +1,25 @@
-use crate::scene::error::Sx3dError;
 use std::fs::{File, OpenOptions};
 use stl_io::{read_stl, IndexedMesh};
 
-pub fn read_mesh(path: String) -> Result<IndexedMesh, Sx3dError> {
+pub fn read_mesh(path: String) -> Result<IndexedMesh, String> {
     let mut file = read_file(path)?;
     let mesh = read_mesh_from_file(&mut file)?;
     Ok(mesh)
 }
 
-fn read_file(path: String) -> Result<File, Sx3dError> {
+fn read_file(path: String) -> Result<File, String> {
     let file_result = OpenOptions::new().read(true).open(&path);
     match file_result {
         Ok(file) => Ok(file),
-        Err(error) => Err(Sx3dError {
-            message: format!("Error Reading File: {path}"),
-            error: Some(Box::new(error)),
-        }),
+        Err(error) => Err(format!("Error: {error} Reading File: {path}")),
     }
 }
 
-fn read_mesh_from_file(file: &mut File) -> Result<IndexedMesh, Sx3dError> {
+fn read_mesh_from_file(file: &mut File) -> Result<IndexedMesh, String> {
     let mesh_result = read_stl(file);
     match mesh_result {
         Ok(mesh) => Ok(mesh),
-        Err(error) => Err(Sx3dError {
-            message: format!("Error Reading Mesh: {error}"),
-            error: Some(Box::new(error)),
-        }),
+        Err(error) => Err(format!("Error: {error} Reading Mesh")),
     }
 }
 

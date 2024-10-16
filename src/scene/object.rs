@@ -1,52 +1,22 @@
+use rayon::prelude::*;
+use std::sync::{Arc, Mutex};
 use stl_io::{IndexedMesh, IndexedTriangle, Vector, Vertex};
 
 #[derive(Debug)]
-pub struct ObjectAttributes {
-    maximum_radius: f32,
-}
-
-impl ObjectAttributes {
-    pub fn new(indexed_mesh: &IndexedMesh) -> ObjectAttributes {
-        let maximum_radius: f32 = Self::calculate_maximum_radius(indexed_mesh);
-        ObjectAttributes { maximum_radius }
-    }
-
-    pub fn get_maximum_radius(&self) -> &f32 {
-        &self.maximum_radius
-    }
-
-    fn calculate_maximum_radius(mesh: &IndexedMesh) -> f32 {
-        let mut maximum_radius: f32 = 0.0;
-        for vertex in &mesh.vertices {
-            let radius: f32 = Self::calculate_vertex_radius(vertex);
-            if radius > maximum_radius {
-                maximum_radius = radius;
-            }
-        }
-        maximum_radius
-    }
-
-    fn calculate_vertex_radius(vertex: &Vector<f32>) -> f32 {
-        let x = vertex[0];
-        let y = vertex[1];
-        let z = vertex[2];
-
-        (x.powi(2) + y.powi(2) + z.powi(2)).sqrt()
-    }
-}
-
-#[derive(Debug)]
 pub struct Object {
-    attributes: ObjectAttributes,
     mesh: IndexedMesh,
+    maximum_radius: f32,
 }
 
 impl Object {
     pub fn new(indexed_mesh: IndexedMesh) -> Object {
         let mesh = Object::move_mesh_to_center(indexed_mesh);
-        let attributes = ObjectAttributes::new(&mesh);
+        let maximum_radius = Self::calculate_maximum_radius(&mesh);
 
-        Object { attributes, mesh }
+        Object {
+            mesh,
+            maximum_radius,
+        }
     }
 
     pub fn get_mesh(&self) -> &IndexedMesh {
@@ -69,7 +39,7 @@ impl Object {
     }
 
     pub fn get_maximum_radius(&self) -> &f32 {
-        self.attributes.get_maximum_radius()
+        &self.maximum_radius
     }
 
     fn rotate_mesh(&mut self, angles: (&f32, &f32, &f32)) {
@@ -113,13 +83,11 @@ impl Object {
 
     fn move_vertices_to_center(vertices: Vec<Vector<f32>>) -> Vec<Vector<f32>> {
         let (x, y, z) = Object::calculate_center_coordinates(&vertices);
-        let mut new_vertices: Vec<Vector<f32>> = Vec::new();
 
-        for vertex in vertices {
-            new_vertices.push(Object::move_vertex_against_vector(vertex, (x, y, z)));
-        }
-
-        new_vertices
+        vertices
+            .par_iter()
+            .map(|vertex| Object::move_vertex_against_vector(*vertex, (x, y, z)))
+            .collect()
     }
 
     fn move_vertex_against_vector(vertex: Vector<f32>, vector: (f32, f32, f32)) -> Vector<f32> {
@@ -204,13 +172,10 @@ impl Object {
         vertices: &Vec<Vector<f32>>,
         angles: (&f32, &f32, &f32),
     ) -> Vec<Vector<f32>> {
-        let mut new_vertices: Vec<Vector<f32>> = Vec::new();
-
-        for vertex in vertices {
-            new_vertices.push(self.rotate_vertex(vertex, angles));
-        }
-
-        new_vertices
+        vertices
+            .par_iter()
+            .map(|vertex| self.rotate_vertex(vertex, angles))
+            .collect()
     }
 
     fn rotate_faces(
@@ -218,12 +183,33 @@ impl Object {
         faces: &Vec<IndexedTriangle>,
         angles: (&f32, &f32, &f32),
     ) -> Vec<IndexedTriangle> {
-        let mut new_faces: Vec<IndexedTriangle> = Vec::new();
+        faces
+            .par_iter()
+            .map(|face| self.rotate_face(face, angles))
+            .collect()
+    }
 
-        for face in faces {
-            new_faces.push(self.rotate_face(face, angles));
-        }
+    fn calculate_maximum_radius(mesh: &IndexedMesh) -> f32 {
+        let maximum_radius: Arc<Mutex<f32>> = Arc::new(Mutex::new(0.0));
 
-        new_faces
+        mesh.vertices.par_iter().for_each(|vertex| {
+            let current_radius = Self::calculate_vertex_radius(vertex);
+            let mut maximum_radius = maximum_radius.lock().unwrap();
+
+            if current_radius > *maximum_radius {
+                *maximum_radius = current_radius;
+            }
+        });
+
+        let result = maximum_radius.lock().unwrap();
+        *result
+    }
+
+    fn calculate_vertex_radius(vertex: &Vector<f32>) -> f32 {
+        let x = vertex[0];
+        let y = vertex[1];
+        let z = vertex[2];
+
+        (x.powi(2) + y.powi(2) + z.powi(2)).sqrt()
     }
 }

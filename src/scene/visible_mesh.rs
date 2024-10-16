@@ -1,8 +1,13 @@
 use crate::utils::{calculate_mean_z, calculate_shadow_value, is_face_visible};
-use std::{collections::HashMap, f32::INFINITY};
+use rayon::prelude::*;
+use std::{
+    collections::HashMap,
+    f32::INFINITY,
+    sync::{Arc, Mutex},
+};
 use stl_io::{IndexedMesh, Vertex};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VisibleFace {
     vertices: [usize; 3],
     normal: [f32; 3],
@@ -45,7 +50,7 @@ impl VisibleFace {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VisibleMesh {
     vertices: HashMap<usize, [f32; 3]>,
     faces: Vec<VisibleFace>,
@@ -53,15 +58,15 @@ pub struct VisibleMesh {
 
 impl VisibleMesh {
     pub fn new(mesh: &IndexedMesh, light: &[f32; 3], observer: &[f32; 3]) -> VisibleMesh {
-        let mut visible_mesh = VisibleMesh {
+        let visible_mesh = Arc::new(Mutex::new(VisibleMesh {
             vertices: HashMap::new(),
             faces: Vec::new(),
-        };
+        }));
 
         let original_vertices = &mesh.vertices;
         let original_faces = &mesh.faces;
 
-        for face in original_faces.iter() {
+        original_faces.par_iter().for_each(|face| {
             let vertices = face.vertices;
             let normal: [f32; 3] = face.normal.into();
 
@@ -73,13 +78,16 @@ impl VisibleMesh {
                 let original_vertex_3: [f32; 3] = original_vertices[vertices[2]].into();
                 let mean_z =
                     calculate_mean_z(&[original_vertex_1, original_vertex_2, original_vertex_3]);
+
+                let mut visible_mesh = visible_mesh.lock().unwrap();
                 visible_face.set_shadow_value(shadow_value);
                 visible_face.set_mean_z(&mean_z);
                 visible_mesh.set_face(visible_face, original_vertices);
             }
-        }
+        });
 
-        visible_mesh
+        let result = visible_mesh.lock().unwrap();
+        result.clone()
     }
 
     pub fn new_from_vertices_and_visible_faces(
