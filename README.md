@@ -24,25 +24,21 @@ Options:
 
 ## Installation
 
-1. Clone the repository:
+Install using Cargo:
 
 ```bash
-git clone https://github.com/luisbedoia/sx3d.git
-```
-
-2. Enter the SX3D directory:
-
-```bash
-cd sx3d
-```
-
-3. Install using Cargo:
-
-```bash
-cargo install --path .
+cargo install --git https://github.com/luisbedoia/sx3d
 ```
 
 Now, you can run `sx3d` from any location in your terminal.
+
+## Uninstallation
+
+Uninstall using Cargo:
+
+```bash
+cargo uninstall sx3d
+```
 
 ## Examples
 
