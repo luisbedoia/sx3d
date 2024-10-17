@@ -24,22 +24,10 @@ Options:
 
 ## Installation
 
-1. Clone the repository:
+Install using Cargo:
 
 ```bash
-git clone https://github.com/luisbedoia/sx3d.git
-```
-
-2. Enter the SX3D directory:
-
-```bash
-cd sx3d
-```
-
-3. Install using Cargo:
-
-```bash
-cargo install --path .
+cargo install --git https://github.com/luisbedoia/sx3d
 ```
 
 Now, you can run `sx3d` from any location in your terminal.
@@ -58,10 +46,10 @@ This will visualize the 3D STL file using 41 rows in the console.
 
 ## Uninstallation
 
-If you ever need to uninstall SX3D, go to the SX3D directory and run:
+If you ever need to uninstall SX3D, using Cargo:
 
 ```bash
-cargo uninstall
+cargo uninstall sx3d
 ```
 
 This will remove the application from your system.
