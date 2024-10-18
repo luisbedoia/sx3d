@@ -1,6 +1,10 @@
 # SX3D
 
-SX3D is a straightforward 3D STL files viewer designed for the console. The application provides a convenient way to render and view STL files in a text-based environment.
+SX3D is a straightforward 3D files viewer designed for the console. The application provides a convenient way to render and view 3D files in a text-based environment.
+
+## Formats Supported
+- STL
+- OBJ
 
 ## Usage
 
@@ -13,13 +17,14 @@ sx3d --help
 This will display the available options and their usage:
 
 ```bash
-Usage: sx3d [OPTIONS] --path <PATH>
+Usage: sx3d <PATH>
+
+Arguments:
+  <PATH>  Path to the 3D file. It can be OBJ or STL
 
 Options:
-  -p, --path <PATH>  Path to the STL file to render
-  -c, --cols <COLS>  Number of columns to use for rendering in the console [default: 31]
-  -h, --help         Print help
-  -V, --version      Print version
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 ## Installation
@@ -34,15 +39,23 @@ Now, you can run `sx3d` from any location in your terminal.
 
 ## Examples
 
-To test the viewer, navigate to the `examples` directory and run the following command:
+To test the viewer you can use the following examples in the `examples` folder of this repository. Or you can use your own 3D files.
 
 ```bash
-sx3d -p cube_ascii.stl -c 41
+sx3d pumpkin.obj
 ```
 
-This will visualize the 3D STL file using 41 rows in the console.
+This will visualize the 3D in the console.
 
-![](https://github.com/luisbedoia/sx3d/blob/main/examples/cube.gif)
+![](https://github.com/luisbedoia/sx3d/blob/main/examples/pumpkin.gif)
+
+## Rendering resolution
+
+This program reads your termial size and adjusts the rendering resolution to fit the screen once at the starting. If you want to change the resolution, yo need to stop the program using `q` key, and doing one of the following options:
+- Increase/decrease the font size of your terminal.
+- Increase/decrease the terminal window size.
+
+And then, run the program again.
 
 ## Uninstallation
 

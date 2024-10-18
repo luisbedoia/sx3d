@@ -1,19 +1,15 @@
 use clap::Parser;
 
-/// A simple 3D STL files viewer on console
+/// A simple 3D files viewer on console
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Path to the STL file to render
-    #[arg(short, long)]
+    /// Path to the 3D file. It can be OBJ or STL.
+    #[arg()]
     path: String,
-
-    /// Number of colums to use for rendering in the console
-    #[arg(short, long, default_value_t = 31)]
-    cols: usize,
 }
 
-pub fn get_file_path() -> (String, usize) {
+pub fn get_file_path() -> String {
     let args = Args::parse();
-    (args.path, args.cols)
+    args.path
 }

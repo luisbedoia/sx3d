@@ -1,5 +1,6 @@
-pub mod controller;
+pub mod canvas;
+pub mod entities;
 pub mod input_output;
-pub mod matrix;
-pub mod scene;
-pub mod utils;
+
+pub use canvas::*;
+pub use entities::*;

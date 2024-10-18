@@ -1,14 +1,14 @@
+use super::read_mesh;
+use super::Controller;
+use crate::canvas::SquaredCanvas;
+use crate::entities::object::Object;
+use crate::entities::scene::Scene;
+use crate::Vector3D;
 use std::io::{stdin, stdout, Write};
 use termion::event::{Event, Key};
 use termion::input::TermRead;
 use termion::raw::{IntoRawMode, RawTerminal};
-
-use crate::controller::Controller;
-use crate::matrix::Matrix;
-use crate::scene::scene::Scene;
-use crate::scene::Object;
-
-use super::read_mesh;
+use termion::terminal_size;
 
 pub struct Console {}
 
@@ -23,13 +23,35 @@ impl Console {
         Self {}
     }
 
-    pub fn start(&mut self, path: String, cols: usize) {
+    pub fn start(&mut self, path: String) {
         let indexed_mesh = read_mesh(path).unwrap();
         let object = Object::new(indexed_mesh.clone());
+        let size = terminal_size().unwrap();
+
+        let (mut i, j) = size;
+        i = (i + 2) / 3;
+        let mut cols: usize;
+
+        if i >= j {
+            cols = j as usize;
+        } else {
+            cols = i as usize;
+        }
+
+        if cols % 2 == 0 {
+            cols -= 1;
+        } else {
+            cols -= 2;
+        }
+
         let maximum_diameter = 2.0 * object.get_maximum_radius();
 
-        let scene = Scene::new(object, [-1.0, -1.0, -1.0], [0.0, 0.0, -1.0]);
-        let matrix = Matrix::new(cols, maximum_diameter);
+        let scene = Scene::new(
+            object,
+            Vector3D::new(-1.0, -1.0, -1.0),
+            Vector3D::new(0.0, 0.0, -1.0),
+        );
+        let matrix = SquaredCanvas::new(cols, maximum_diameter);
 
         let mut controller = Controller::new(scene, matrix);
 
