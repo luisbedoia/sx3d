@@ -47,7 +47,7 @@ sx3d pumpkin.obj
 
 This will visualize the 3D in the console.
 
-![](https://github.com/luisbedoia/sx3d/blob/adding_obj_support/examples/pumpkin.gif)
+![](https://github.com/luisbedoia/sx3d/blob/main/examples/pumpkin.gif)
 
 ## Rendering resolution
 
