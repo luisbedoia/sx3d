@@ -79,7 +79,7 @@ impl VisibleIndexedMesh3D {
     }
 }
 
-impl<'a> Iterator for VisibleIndexedMesh3DIterator<'a> {
+impl Iterator for VisibleIndexedMesh3DIterator<'_> {
     type Item = VisibleTriangle2D;
 
     fn next(&mut self) -> Option<Self::Item> {

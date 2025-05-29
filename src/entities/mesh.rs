@@ -31,7 +31,7 @@ impl IndexedMesh3D {
     }
 }
 
-impl<'a> Iterator for IndexedMesh3DIterator<'a> {
+impl Iterator for IndexedMesh3DIterator<'_> {
     type Item = Triangle3D;
 
     fn next(&mut self) -> Option<Self::Item> {

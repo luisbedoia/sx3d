@@ -1,7 +1,6 @@
 use crate::entities::VisibleIndexedMesh3D;
 use crate::entities::{Vector2D, VisibleTriangle2D};
 use std::char;
-use std::f32::INFINITY;
 use std::ops::Range;
 use std::sync::{Arc, Mutex};
 
@@ -34,7 +33,7 @@ impl SquaredCanvas {
             chars_per_row,
             data_length,
             data: Arc::new(Mutex::new(vec![' '; data_length])),
-            mean_z: Arc::new(Mutex::new(vec![-INFINITY; data_length])),
+            mean_z: Arc::new(Mutex::new(vec![-f32::INFINITY; data_length])),
         }
     }
 
@@ -64,7 +63,7 @@ impl SquaredCanvas {
         });
 
         self.mean_z.lock().unwrap().iter_mut().for_each(|z| {
-            *z = -INFINITY;
+            *z = -f32::INFINITY;
         });
 
         visible_mesh.iter().for_each(|triangle| {
