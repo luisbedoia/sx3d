@@ -1,4 +1,5 @@
 use sx3d::{mesh::IndexedMesh3D, IndexedTriangle3D, Object, Vector3D};
+use assert_float_eq::*;
 
 #[test]
 fn it_should_create_object() {
@@ -38,5 +39,6 @@ fn it_should_create_object() {
 
     println!("{:#?}", object);
 
-    assert_eq!(object.get_maximum_radius(), &1.0);
+    let expected = (11.0_f32).sqrt() / 4.0_f32; // sqrt(0.75^2 + 0.25^2 + 0.25^2)
+    assert_f32_near!(*object.get_maximum_radius(), expected);
 }

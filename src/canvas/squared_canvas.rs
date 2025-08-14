@@ -1,5 +1,6 @@
 use crate::entities::VisibleIndexedMesh3D;
 use crate::entities::{Vector2D, VisibleTriangle2D};
+use super::shading::shade_to_char;
 use std::char;
 use std::ops::Range;
 use std::sync::{Arc, Mutex};
@@ -77,26 +78,30 @@ impl SquaredCanvas {
         data_reversed.into_iter().rev().collect()
     }
 
-    fn get_index(&self, col: &isize, row: &isize) -> usize {
-        let transported_col = (col + self.zero_col as isize) as usize;
-        let transported_row = (row + self.zero_col as isize) as usize;
+    fn get_index(&self, col: &isize, row: &isize) -> Option<usize> {
+        let transported_col = *col + self.zero_col as isize;
+        let transported_row = *row + self.zero_col as isize;
 
-        if transported_col >= self.cols || transported_row >= self.cols {
-            println!("col: {}", col);
-            println!("row: {}", row);
-            panic!("index out of bounds");
+        if transported_col < 0
+            || transported_row < 0
+            || transported_col >= self.cols as isize
+            || transported_row >= self.cols as isize
+        {
+            return None;
         }
 
-        3 * transported_col + transported_row * self.chars_per_row
+        let transported_col = transported_col as usize;
+        let transported_row = transported_row as usize;
+        Some(3 * transported_col + transported_row * self.chars_per_row)
     }
 
     fn set_pixel(&self, col: &isize, row: &isize, shadow_char: &char, mean_z: &f32) {
-        let index = self.get_index(col, row);
-        let current_mean_z = self.mean_z.lock().unwrap()[index];
-
-        if *mean_z > current_mean_z {
-            self.mean_z.lock().unwrap()[index] = *mean_z;
-            self.data.lock().unwrap()[index] = *shadow_char;
+        if let Some(index) = self.get_index(col, row) {
+            let current_mean_z = self.mean_z.lock().unwrap()[index];
+            if *mean_z > current_mean_z {
+                self.mean_z.lock().unwrap()[index] = *mean_z;
+                self.data.lock().unwrap()[index] = *shadow_char;
+            }
         }
     }
 
@@ -115,19 +120,29 @@ impl SquaredCanvas {
     fn set_triangle(&self, triangle_2d: &VisibleTriangle2D) {
         let [min_point, max_point] = triangle_2d.get_bounding_box_2d();
         let shadow_value = triangle_2d.shadow_value;
-        let shadow_char = get_shadow_char(shadow_value);
+        let shadow_char = shade_to_char(shadow_value);
         let mean_z = triangle_2d.mean_z;
+
         let (min_col, min_row) = self.coordinates_to_indexes(&min_point[0], &min_point[1]);
         let (max_col, max_row) = self.coordinates_to_indexes(&max_point[0], &max_point[1]);
-        let row_range = Self::get_asc_range(min_row, max_row);
-        let col_range = Self::get_asc_range(min_col, max_col);
+
+        let bound = self.zero_col as isize;
+        let min_row_c = min_row.clamp(-bound, bound);
+        let max_row_c = max_row.clamp(-bound, bound);
+        let min_col_c = min_col.clamp(-bound, bound);
+        let max_col_c = max_col.clamp(-bound, bound);
+
+        if min_row_c > max_row_c || min_col_c > max_col_c {
+            return;
+        }
+
+        let row_range = Self::get_asc_range(min_row_c, max_row_c);
+        let col_range = Self::get_asc_range(min_col_c, max_col_c);
 
         for row in row_range {
             for col in col_range.clone() {
                 let point = self.indexes_to_coordinates(col, row);
-                let is_point_inside = triangle_2d.contains_point(&point);
-
-                if is_point_inside {
+                if triangle_2d.contains_point(&point) {
                     self.set_pixel(&col, &row, &shadow_char, &mean_z);
                 }
             }
@@ -140,19 +155,5 @@ impl SquaredCanvas {
         } else {
             number_2..(number_1 + 1)
         }
-    }
-}
-
-pub fn get_shadow_char(value: f32) -> char {
-    let gray_scale = [
-        '.', ':', '-', '"', '+', '=', 'c', 'o', '*', '%', '#', 'M', '@',
-    ];
-
-    let length = gray_scale.len() as f32;
-    let index = (value * length).floor() as usize;
-    if index >= length as usize {
-        '@'
-    } else {
-        gray_scale[index]
     }
 }
