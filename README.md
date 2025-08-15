@@ -51,7 +51,7 @@ This will visualize the 3D in the console.
 
 ## Rendering resolution
 
-This program reads your termial size and adjusts the rendering resolution to fit the screen once at the starting. If you want to change the resolution, yo need to stop the program using `q` key, and doing one of the following options:
+This program reads your terminal size and adjusts the rendering resolution to fit the screen once at the starting. If you want to change the resolution, you need to stop the program using `q` key, and doing one of the following options:
 - Increase/decrease the font size of your terminal.
 - Increase/decrease the terminal window size.
 
